@@ -1,0 +1,46 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install common packages via apt
+      apt:
+        name:
+          - curl
+          - git
+          - wget
+          - build-essential
+        state: present
+
+    - name: Clone dotfiles repo (if not exist)
+      git:
+        repo: \"https://github.com/h0jicha/dotfiles.git\"
+        dest: \"~/dotfiles\"
+        clone: yes
+        update: yes
+
+    - name: dotfiles の link.sh を実行
+      shell: bash ~/dotfiles/link.sh
+      args:
+        executable: /bin/bash
+
+    - name: Ensure packer.nvim is installed
+      git:
+        repo: "https://github.com/wbthomason/packer.nvim.git"
+        dest: "~/.local/share/nvim/site/pack/packer/start/packer.nvim"
+        depth: 1
+
+    - name: Install Neovim plugins
+      shell: "nvim --headless +PackerSync +qa"
+      args:
+        executable: /bin/bash
+
+    - name: Install starship
+      shell: curl -fsSL https://starship.rs/install.sh | bash -s -- -y
+      args:
+        executable: /bin/bash

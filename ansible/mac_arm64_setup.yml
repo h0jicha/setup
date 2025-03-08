@@ -1,0 +1,222 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true
+
+  tasks:
+    - name: Install Homebrew if not installed
+      shell: |
+        if ! command -v brew >/dev/null 2>&1; then
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Run brew bundle
+      shell: brew bundle --file="~/dotfiles/mac/Brewfile"
+
+    - name: Check if CommandLineTools are installed
+      stat:
+        path: /Library/Developer/CommandLineTools
+      register: clt_stat
+
+    - name: Install Xcode Command Line Tools
+      command: xcode-select --install
+      when: not clt_stat.stat.exists
+
+    - name: Docker 用ディレクトリを作成
+      file:
+        path: "~/.docker"
+        state: directory
+
+    - name: Docker 設定ファイルを作成
+      file:
+        path: "~/.docker/config.json"
+        state: touch
+
+    - name: dotfiles リポジトリをクローン
+      git:
+        repo: "https://github.com/h0jicha/dotfiles.git"
+        dest: "~/dotfiles"
+        clone: yes
+        update: yes
+
+    - name: dotfiles の link.sh を実行
+      shell: bash ~/dotfiles/link.sh
+      args:
+        executable: /bin/bash
+
+    - name: Ensure packer.nvim is installed
+      git:
+        repo: "https://github.com/wbthomason/packer.nvim.git"
+        dest: "~/.local/share/nvim/site/pack/packer/start/packer.nvim"
+        depth: 1
+
+    - name: Install Neovim plugins
+      shell: "nvim --headless +PackerSync +qa"
+      args:
+        executable: /bin/bash
+
+    - name: asdf で Node.js をインストール
+      shell: |
+        asdf plugin-add nodejs || true
+        asdf install nodejs latest
+        asdf global nodejs latest
+      args:
+        executable: /bin/bash
+
+    - name: 必要なディレクトリを作成
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "~/dev"
+        - "~/dev/projects"
+        - "~/dev/data"
+        - "~/Screenshots"
+
+    - name: Dock を自動的に隠す
+      osx_defaults:
+        domain: com.apple.dock
+        key: autohide
+        type: bool
+        value: true
+
+    - name: 隠しファイルを表示
+      osx_defaults:
+        domain: com.apple.finder
+        key: AppleShowAllFiles
+        type: bool
+        value: true
+
+    - name: Finder の拡張子を常に表示
+      osx_defaults:
+        domain: com.apple.finder
+        key: AppleShowAllExtensions
+        type: bool
+        value: true
+
+    - name: スクリーンショットの保存先を変更
+      osx_defaults:
+        domain: com.apple.screencapture
+        key: location
+        type: string
+        value: "~/Screenshots"
+
+    - name: キーリピート速度を最速にする
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: KeyRepeat
+        type: int
+        value: 1
+
+    - name: キーリピートの開始時間を最速にする
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: InitialKeyRepeat
+        type: int
+        value: 10
+
+    - name: fnキーによる音声入力を無効化
+      osx_defaults:
+        domain: com.apple.HIToolbox
+        key: AppleDictationAutoEnable
+        type: bool
+        value: false
+
+    - name: Caps Lock で ABC 入力モードを有効化
+      osx_defaults:
+        domain: com.apple.inputmethod.Kotoeri
+        key: JIMPrefCapsLockSwitch
+        type: int
+        value: 1
+
+    - name: スマート引用符を無効化
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: NSAutomaticQuoteSubstitutionEnabled
+        type: bool
+        value: false
+
+    - name: ¥キーを \\ に変更
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: NSUserKeyEquivalents
+        type: dict
+        value: {"¥":"\\"}
+
+    - name: タップでクリックを有効化
+      osx_defaults:
+        domain: com.apple.AppleMultitouchTrackpad
+        key: Clicking
+        type: bool
+        value: true
+
+    - name: トラックパッドの軌跡の速さを最速に設定
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: com.apple.trackpad.scaling
+        type: float
+        value: 3.0
+
+    - name: ナチュラルなスクロールを無効化
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: com.apple.swipescrolldirection
+        type: bool
+        value: false
+
+    - name: 書類を閉じるときに変更内容を保持するか確認
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: NSCloseAlwaysConfirmsChanges
+        type: bool
+        value: true
+
+    - name: 起動音を無効化
+      osx_defaults:
+        domain: com.apple.PowerChime
+        key: ChimeOnAllHardware
+        type: bool
+        value: false
+
+    - name: Finder を再起動
+      shell: killall Finder || true
+
+    - name: Dock を再起動
+      shell: killall Dock || true
+
+    - name: Firefox がインストールされているか確認
+      stat:
+        path: "/Applications/Firefox.app"
+      register: firefox_installed
+
+    - name: デフォルトの Web ブラウザを Firefox に設定
+      shell: "open -a 'Firefox' --args --setDefaultBrowser"
+      when: firefox_installed.stat.exists
+
+    - name: スクリーンセーバを 20 分後に開始
+      osx_defaults:
+        domain: com.apple.screensaver
+        key: idleTime
+        type: int
+        value: 1200
+
+    - name: バッテリー駆動時に使用していない場合はディスプレイをオフにしない
+      command: pmset -b displaysleep 0
+      become: yes
+
+    - name: 電源アダプタ接続時に使用していない場合はディスプレイをオフにしない
+      command: pmset -c displaysleep 0
+      become: yes
+
+    - name: スクリーンセーバ開始後パスワード要求までの時間を 5 秒に設定
+      osx_defaults:
+        domain: com.apple.screensaver
+        key: askForPasswordDelay
+        type: int
+        value: 5
+
+    - name: 再起動を実行 (オプション)
+      reboot:
+        msg: "Restarting the system to apply all changes..."
