@@ -12,6 +12,7 @@ brew "wget"
 brew "google-cloud-sdk"
 brew "asdf"
 brew "uv"
+brew "neovim"
 
 # Cask
 cask "google-chrome"
