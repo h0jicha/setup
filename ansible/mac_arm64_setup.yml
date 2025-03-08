@@ -5,7 +5,7 @@
 
   tasks:
     - name: Run brew bundle
-      shell: brew bundle --file="~/dotfiles/mac/Brewfile" -y
+      shell: brew bundle --file="~/dotfiles/mac/Brewfile"
 
     - name: Check if CommandLineTools are installed
       stat:
