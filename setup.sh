@@ -12,7 +12,12 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS_TYPE="linux"
   fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  OS_TYPE="mac"
+  if [[ $(uname -m) == "arm64" ]]; then
+    OS_TYPE="mac_arm64"
+  else
+    echo "Unsupported Mac architecture: $(uname -m)"
+    exit 1
+  fi
 else
   echo "Unsupported OS: $OSTYPE"
   exit 1
@@ -31,12 +36,12 @@ install_prereqs() {
       # Homebrew が無い場合はインストール
       if ! command -v brew &> /dev/null; then
         echo "Homebrew not found. Installing..."
-        /bin/bash -c "yes | $(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         echo >> ~/.zprofile
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
         eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
-      yes | brew install ansible curl git
+      brew install ansible curl git
       ;;
     linux)
       # 上記以外の Linux ディストリビューション向けの処理を追加
