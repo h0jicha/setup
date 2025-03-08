@@ -2,7 +2,7 @@
 
 set -e
 
-RAW_BASE="https://raw.githubusercontent.com/h0jicha/setup"
+RAW_BASE="https://raw.githubusercontent.com/h0jicha/setup/HEAD"
 
 # OS 判定
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
