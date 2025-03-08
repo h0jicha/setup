@@ -41,7 +41,7 @@ cask "font-hackgen"
 cask "font-hackgen-nerd"
 
 # MAS apps
-mas 441258766, name: "Magnet"
-mas 634148309, name: "Logic Pro"
-mas 1055511498, name: "Day One"
-mas 1291898086, name: "Toggl Track"
+mas "Magnet", id: 441258766
+mas "Logic Pro", id: 634148309
+mas "Day One", id: 1055511498
+mas "Toggl Track", id: 1291898086
