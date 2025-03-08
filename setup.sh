@@ -36,7 +36,7 @@ install_prereqs() {
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
         eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
-      brew install ansible curl git -y
+      yes | brew install ansible curl git
       ;;
     linux)
       # 上記以外の Linux ディストリビューション向けの処理を追加
