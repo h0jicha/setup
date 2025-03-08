@@ -60,6 +60,7 @@ TMP_PLAYBOOK="/tmp/${PLAYBOOK}"
 
 echo "Downloading $PLAYBOOK from $RAW_BASE/ansible/${PLAYBOOK} ..."
 curl -fsSL "$RAW_BASE/ansible/${PLAYBOOK}" -o "$TMP_PLAYBOOK"
+curl -fsSL "$RAW_BASE/Brewfile" -o /tmp/Brewfile
 
 # ansible-playbook 実行
 echo "Running ansible-playbook $TMP_PLAYBOOK ..."

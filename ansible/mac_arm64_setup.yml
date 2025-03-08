@@ -5,7 +5,7 @@
 
   tasks:
     - name: Run brew bundle
-      shell: brew bundle --file=$(curl -fsSL https://raw.githubusercontent.com/h0jicha/setup/HEAD/Brewfile)
+      shell: brew bundle --file=/tmp/Brewfile
 
     - name: Check if CommandLineTools are installed
       stat:
