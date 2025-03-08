@@ -36,10 +36,11 @@ install_prereqs() {
       # Homebrew が無い場合はインストール
       if ! command -v brew &> /dev/null; then
         echo "Homebrew not found. Installing..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        yes "" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         echo >> ~/.zprofile
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
         eval "$(/opt/homebrew/bin/brew shellenv)"
+        source ~/.zprofile
       fi
       brew install ansible curl git
       ;;
